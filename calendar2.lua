@@ -17,66 +17,75 @@ local naughty = require("naughty")
 module("calendar2")
 
 local calendar = {}
-local current_day_format = '<b><span color="#00ff00">%s</span></b>'
+local dformat = {
+    today = '<b><span color="#00ff00">%2i</span></b>',
+    anyday = '%2i'
+}
 
-function displayMonth(month,year,weekStart)
-    local t,wkSt=os.time{year=year, month=month+1, day=0},weekStart or 1
-    local d=os.date("*t",t)
-    local mthDays,stDay=d.day,(d.wday-d.day-wkSt+1)%7
+function fdate(format, table)
+    return os.date(format, os.time(table))
+end
 
-    --print(mthDays .."\n" .. stDay)
-    local lines = "    "
+function displayMonth(month, year, weekStart)
+    local highlightRequire = "%m-%d"
+    local today = os.date(highlightRequire)
+    -- weekStart=1 <=> monday; 2001 started with a monday
+    local tA = os.time({year=year, month=month, day=1})
+    local d0 = fdate("*t", {year=2001, month=1, day=weekStart})
+    local dA = fdate("*t", {year=year, month=month, day=1})
+    local dB = fdate("*t", {year=year, month=month+1, day=0})
+    local colA = (dA.wday - d0.wday) % 7
 
-    for x=0,6 do
-        lines = lines .. os.date("%a ",os.time{year=2006,month=1,day=x+wkSt})
+    -- print header
+    local lines = os.date("%B %Y\n", tA)
+
+    -- print week-day names (table head row)
+    lines = lines .. "\n    "
+    for x = 0,6 do
+        lines = lines .. fdate("%a ", {year=d0.year, month=d0.month, day=d0.day+x})
     end
 
-    lines = lines .. "\n" .. os.date(" %V",os.time{year=year,month=month,day=1})
-
-    local writeLine = 1
-    while writeLine < (stDay + 1) do
+    -- print empty space before first day
+    lines = lines .. "\n" .. os.date(" %V", tA)
+    local column = 0
+    while column < colA do
         lines = lines .. "    "
-        writeLine = writeLine + 1
+        column = column + 1
     end
 
-    for d=1,mthDays do
-        local x = d
-        local t = os.time{year=year,month=month,day=d}
-        if writeLine == 8 then
-            writeLine = 1
-            lines = lines .. "\n" .. os.date(" %V",t)
+    -- iterate all days of the month
+    for day = 1,dB.day do
+        if column == 7 then
+            column = 0
+            lines = lines .. "\n" .. fdate(" %V", {year=year, month=month, day=day})
         end
-        if os.date("%Y-%m-%d") == os.date("%Y-%m-%d", t) then
-            x = string.format(current_day_format, d)
+        if today == fdate(highlightRequire, {day=day, month=month, year=year}) then
+            lines = lines .. "  " .. string.format(dformat.today, day)
+        else
+            lines = lines .. "  " .. string.format(dformat.anyday, day)
         end
-        if (#(tostring(d)) == 1) then
-            x = " " .. x
-        end
-        lines = lines .. "  " .. x
-        writeLine = writeLine + 1
+        column = column + 1
     end
-    local header = os.date("%B %Y\n",os.time{year=year,month=month,day=1})
-
-    return header .. "\n" .. lines
+    return lines
 end
 
 function switchNaughtyMonth(switchMonths)
     if (#calendar < 3) then return end
     local swMonths = switchMonths or 1
     calendar[1] = calendar[1] + swMonths
-    calendar[3].box.widgets[2].text = string.format('<span font_desc="%s">%s</span>', "monospace", displayMonth(calendar[1], calendar[2], 2))
+    calendar[3].box.widgets[2].text = string.format('<span font_desc="%s">%s</span>', "monospace", displayMonth(calendar[1], calendar[2], 1))
 end
 
 function addCalendarToWidget(mywidget, custom_current_day_format)
     if custom_current_day_format then
-        current_day_format = custom_current_day_format
+        dformat.today = custom_current_day_format
     end
 
     mywidget:add_signal('mouse::enter', function ()
         local month, year = os.date('%m'), os.date('%Y')
         calendar = { month, year,
             naughty.notify({
-                text = string.format('<span font_desc="%s">%s</span>', "monospace", displayMonth(month, year, 2)),
+                text = string.format('<span font_desc="%s">%s</span>', "monospace", displayMonth(month, year, 1)),
                 timeout = 0,
                 hover_timeout = 0.5,
                 screen = capi.mouse.screen
