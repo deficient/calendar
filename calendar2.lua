@@ -54,19 +54,33 @@ function displayMonth(month, year, weekStart)
     end
 
     -- iterate all days of the month
+    local nLines = 1
     for day = 1,dB.day do
         if column == 7 then
             column = 0
+            nLines = nLines + 1
             lines = lines .. "\n" .. fdate(" %V", {year=year, month=month, day=day})
         end
         if today == fdate(highlightRequire, {day=day, month=month, year=year}) then
-            lines = lines .. "  " .. string.format(dformat.today, day)
+            lines = lines .. "  " .. dformat.today:format(day)
         else
-            lines = lines .. "  " .. string.format(dformat.anyday, day)
+            lines = lines .. "  " .. dformat.anyday:format(day)
         end
         column = column + 1
     end
-    return lines
+    while column < 7 do
+        lines = lines .. "    "
+        column = column + 1
+    end
+
+    if nLines > 5 then
+        naughty.notify({text=tostring(nLines)})
+        return lines .. "\n"
+    else
+        naughty.notify({text=tostring(nLines)})
+        return lines
+        -- return lines .. "\n"
+    end
 end
 
 function switchNaughtyMonth(switchMonths)
