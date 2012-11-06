@@ -49,7 +49,7 @@ function displayMonth(month, year, weekStart)
     lines = lines .. "\n" .. os.date(" %V", tA)
     local column = 0
     while column < colA do
-        lines = lines .. "    "
+        lines = lines .. "   -"
         column = column + 1
     end
 
@@ -69,25 +69,31 @@ function displayMonth(month, year, weekStart)
         column = column + 1
     end
     while column < 7 do
-        lines = lines .. "    "
+        lines = lines .. "   -"
         column = column + 1
     end
-
-    if nLines > 5 then
-        naughty.notify({text=tostring(nLines)})
-        return lines .. "\n"
-    else
-        naughty.notify({text=tostring(nLines)})
-        return lines
-        -- return lines .. "\n"
-    end
+    return lines
 end
 
 function switchNaughtyMonth(switchMonths)
     if (#calendar < 3) then return end
     local swMonths = switchMonths or 1
-    calendar[1] = calendar[1] + swMonths
-    calendar[3].box.widgets[2].text = string.format('<span font_desc="%s">%s</span>', "monospace", displayMonth(calendar[1], calendar[2], 1))
+
+    local month = calendar[1] + swMonths
+    local year = calendar[2]
+
+    calendar[1] = month
+    -- TODO: just redraw calendar instead of recreating entirely
+    naughty.destroy(calendar[3])
+    calendar[3] = naughty.notify({
+                text = string.format('<span font_desc="%s">%s</span>', "monospace", displayMonth(month, year, 1)),
+                timeout = 0,
+                hover_timeout = 0.5,
+                screen = capi.mouse.screen
+            })
+
+    -- the following does NOT work (doesnt recalculate boundaries):
+    -- calendar[3].box.widgets[2].text = string.format('<span font_desc="%s">%s</span>', "monospace", displayMonth(calendar[1], calendar[2], 1))
 end
 
 function addCalendarToWidget(mywidget, custom_current_day_format)
