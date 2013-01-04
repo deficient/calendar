@@ -101,7 +101,7 @@ function addCalendarToWidget(mywidget, custom_current_day_format)
         dformat.today = custom_current_day_format
     end
 
-    mywidget:add_signal('mouse::enter', function ()
+    mywidget:connect_signal('mouse::enter', function ()
         local month, year = os.date('%m'), os.date('%Y')
         calendar = { month, year,
             naughty.notify({
@@ -112,7 +112,7 @@ function addCalendarToWidget(mywidget, custom_current_day_format)
             })
         }
     end)
-    mywidget:add_signal('mouse::leave', function () naughty.destroy(calendar[3]) end)
+    mywidget:connect_signal('mouse::leave', function () naughty.destroy(calendar[3]) end)
 
     mywidget:buttons(awful.util.table.join(
         awful.button({ }, 1, function()
