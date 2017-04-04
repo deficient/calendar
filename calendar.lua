@@ -35,7 +35,7 @@ function calendar:init(args)
     self.html       = args.html       or '<span font_desc="monospace">%s</span>'
     self.today      = args.today      or '<b><span color="#00ff00">%2i</span></b>'
     self.anyday     = args.anyday     or '%2i'
-    self.page_title = args.page_title or '%B %Y\n\n'
+    self.page_title = args.page_title or '%B %Y'
     self.col_title  = args.col_title  or '%a '
     return self
 end
@@ -51,11 +51,10 @@ function calendar:page(month, year)
     local tA =                   {year=year, month=month,   day=1         }
     local colA = (dA.wday - d0.wday) % 7
 
-    -- print page title
-    local page = format_date(self.page_title, tA)
+    local page_title = format_date(self.page_title, tA)
 
     -- print column titles (weekday)
-    page = page .. "    "
+    local page = "\n    "
     for d = 0, 6 do
         page = page .. format_date(self.col_title, {
             year  = d0.year,
@@ -91,7 +90,7 @@ function calendar:page(month, year)
         page = page .. "   -"
     end
 
-    return page
+    return page_title, self.html:format(page)
 end
 
 function calendar:switch(months)
@@ -102,12 +101,13 @@ function calendar:show(year, month)
     local today = os.time()
     self.month  = month or os.date('%m', today)
     self.year   = year  or os.date('%Y', today)
-    local text  = self.html:format(self:page(self.month, self.year))
+    local title, text = self:page(self.month, self.year)
 
     if self.notification then
-        naughty.replace_text(self.notification, nil, text)
+        naughty.replace_text(self.notification, title, text)
     else
         self.notification = naughty.notify({
+            title = title,
             text = text,
             timeout = 0,
             hover_timeout = 0.5,
