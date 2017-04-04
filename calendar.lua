@@ -36,19 +36,19 @@ local function displayMonth(month, year, weekStart)
     local colA = (dA.wday - d0.wday) % 7
 
     -- print header
-    local lines = os.date("%B %Y\n", tA)
+    local page = os.date("%B %Y\n", tA)
 
     -- print week-day names (table head row)
-    lines = lines .. "\n    "
+    page = page .. "\n    "
     for x = 0,6 do
-        lines = lines .. fdate("%a ", {year=d0.year, month=d0.month, day=d0.day+x})
+        page = page .. fdate("%a ", {year=d0.year, month=d0.month, day=d0.day+x})
     end
 
     -- print empty space before first day
-    lines = lines .. "\n" .. os.date(" %V", tA)
+    page = page .. "\n" .. os.date(" %V", tA)
     local column = 0
     while column < colA do
-        lines = lines .. "   -"
+        page = page .. "   -"
         column = column + 1
     end
 
@@ -58,20 +58,20 @@ local function displayMonth(month, year, weekStart)
         if column == 7 then
             column = 0
             nLines = nLines + 1
-            lines = lines .. "\n" .. fdate(" %V", {year=year, month=month, day=day})
+            page = page .. "\n" .. fdate(" %V", {year=year, month=month, day=day})
         end
         if today == fdate(highlightRequire, {day=day, month=month, year=year}) then
-            lines = lines .. "  " .. dformat.today:format(day)
+            page = page .. "  " .. dformat.today:format(day)
         else
-            lines = lines .. "  " .. dformat.anyday:format(day)
+            page = page .. "  " .. dformat.anyday:format(day)
         end
         column = column + 1
     end
     while column < 7 do
-        lines = lines .. "   -"
+        page = page .. "   -"
         column = column + 1
     end
-    return lines
+    return page
 end
 
 local function switchNaughtyMonth(switchMonths)
