@@ -14,7 +14,6 @@ local capi = {
 }
 local awful = require("awful")
 local naughty = require("naughty")
-module("calendar2")
 
 local calendar = {}
 local dformat = {
@@ -22,11 +21,11 @@ local dformat = {
     anyday = '%2i'
 }
 
-function fdate(format, table)
+local function fdate(format, table)
     return os.date(format, os.time(table))
 end
 
-function displayMonth(month, year, weekStart)
+local function displayMonth(month, year, weekStart)
     local highlightRequire = "%m-%d"
     local today = os.date(highlightRequire)
     -- weekStart=1 <=> monday; 2001 started with a monday
@@ -75,7 +74,7 @@ function displayMonth(month, year, weekStart)
     return lines
 end
 
-function switchNaughtyMonth(switchMonths)
+local function switchNaughtyMonth(switchMonths)
     if (#calendar < 3) then return end
     local swMonths = switchMonths or 1
 
@@ -96,7 +95,7 @@ function switchNaughtyMonth(switchMonths)
     -- calendar[3].box.widgets[2].text = string.format('<span font_desc="%s">%s</span>', "monospace", displayMonth(calendar[1], calendar[2], 1))
 end
 
-function addCalendarToWidget(mywidget, custom_current_day_format)
+local function addCalendarToWidget(mywidget, custom_current_day_format)
     if custom_current_day_format then
         dformat.today = custom_current_day_format
     end
@@ -142,3 +141,6 @@ function addCalendarToWidget(mywidget, custom_current_day_format)
     ))
 end
 
+return {
+  addCalendarToWidget=addCalendarToWidget,
+}
