@@ -102,18 +102,25 @@ function calendar:show(year, month)
     local today = os.time()
     self.month  = month or os.date('%m', today)
     self.year   = year  or os.date('%Y', today)
+    local text  = self.html:format(self:page(self.month, self.year))
 
-    self:hide()
-    self.notification = naughty.notify({
-        text = self.html:format(self:page(self.month, self.year)),
-        timeout = 0,
-        hover_timeout = 0.5,
-        screen = capi.mouse.screen
-    })
+    if self.notification then
+        naughty.replace_text(self.notification, nil, text)
+    else
+        self.notification = naughty.notify({
+            text = text,
+            timeout = 0,
+            hover_timeout = 0.5,
+            screen = capi.mouse.screen
+        })
+    end
 end
 
 function calendar:hide()
-    naughty.destroy(self.notification)
+    if self.notification then
+        naughty.destroy(self.notification)
+        self.notification = nil
+    end
 end
 
 function calendar:attach(widget)
