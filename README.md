@@ -4,7 +4,8 @@
 
 Small calendar popup for awesome window manager.
 
-This is a more modern derivative of the `calendar2.lua` module.
+This is a polished up and improved module based on the `calendar2.lua` module
+by Bernd Zeimetz and Marc Dequènes.
 
 ### Installation
 
@@ -12,7 +13,7 @@ Drop the script into your awesome config folder. Suggestion:
 
 ```bash
 cd ~/.config/awesome
-git clone git@github.com:coldfix/awesome-calendar.git
+git clone https://github.com/coldfix/awesome-calendar.git
 ```
 
 
