@@ -14,14 +14,18 @@ local awful = require("awful")
 local naughty = require("naughty")
 
 
+------------------------------------------
 -- utility functions
+------------------------------------------
+
 local function format_date(format, date)
     return os.date(format, os.time(date))
 end
 
-local function day_id(date)
-    return format_date("%m-%d", date)
-end
+
+------------------------------------------
+-- calendar popup widget
+------------------------------------------
 
 local calendar = {}
 
@@ -32,17 +36,22 @@ end
 function calendar:init(args)
     -- first day of week: monday=1, …, sunday=7
     self.fdow       = args.fdow       or 1
-    self.html       = args.html       or '<span font_desc="monospace">%s</span>'
+    -- notification area:
+    self.html       = args.html       or '<span font_desc="monospace">\n%s</span>'
+    -- highlight current date:
     self.today      = args.today      or '<b><span color="#00ff00">%2i</span></b>'
     self.anyday     = args.anyday     or '%2i'
-    self.page_title = args.page_title or '%B %Y'
-    self.col_title  = args.col_title  or '%a '
+    self.page_title = args.page_title or '%B %Y'    -- month year
+    self.col_title  = args.col_title  or '%a '      -- weekday
+    -- Date equality check is based on day_id. We deliberately ignore the year
+    -- to highlight the same day in different years:
+    self.day_id     = args.day_id     or '%m-%d'
     return self
 end
 
 function calendar:page(month, year)
 
-    local today = day_id()
+    local today = format_date(self.day_id)
 
     -- 2001 started with a monday:
     local d0 = format_date("*t", {year=2001, month=1,       day=self.fdow })
@@ -54,7 +63,7 @@ function calendar:page(month, year)
     local page_title = format_date(self.page_title, tA)
 
     -- print column titles (weekday)
-    local page = "\n    "
+    local page = "    "
     for d = 0, 6 do
         page = page .. format_date(self.col_title, {
             year  = d0.year,
@@ -78,7 +87,7 @@ function calendar:page(month, year)
             nLines = nLines + 1
             page = page .. "\n" .. format_date(" %V", {year=year, month=month, day=day})
         end
-        if today == day_id {day=day, month=month, year=year} then
+        if today == format_date(self.day_id, {day=day, month=month, year=year}) then
             page = page .. "  " .. self.today:format(day)
         else
             page = page .. "  " .. self.anyday:format(day)
