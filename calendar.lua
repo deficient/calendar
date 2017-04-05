@@ -18,8 +18,69 @@ local naughty = require("naughty")
 -- utility functions
 ------------------------------------------
 
+-- string
 local function format_date(format, date)
     return os.date(format, os.time(date))
+end
+
+local function fakelen(s, n)
+  return setmetatable({}, {
+    __tostring = function() return s end,
+    __len      = function() return n end,
+  })
+end
+
+local function highlight(s, attr)
+  if not attr then return s end
+  local span = "<span %s>%s</span>"
+  return fakelen(span:format(attr, s), #s)
+end
+
+-- functional
+local function table_transpose(rows)
+  local cols = {}
+  for i, row in ipairs(rows) do
+    for j, val in ipairs(row) do
+      cols[j] = cols[j] or {}
+      cols[j][i] = val
+    end
+  end
+  return cols
+end
+
+local function length(x)
+  return #x
+end
+
+local function table_map(func, tab)
+  local result = {}
+  for i, v in ipairs(tab) do
+    result[i] = func(v, i)
+  end
+  return result
+end
+
+local function table_reduce(func, start, tab)
+  local result = start
+  for _, v in ipairs(tab) do
+    result = func(result, v)
+  end
+  return result
+end
+
+-- table -> string
+local function tabulate(rows, gap)
+  local fill = ' '
+  local function format_col(col, i)
+    local len = table_reduce(math.max, 0, table_map(length, col))
+    return table_map(function(v) return fill:rep(len-#v) .. tostring(v) end, col)
+  end
+  local function format_row(row)
+    return table.concat(row, gap)
+  end
+  local cols = table_map(format_col, table_transpose(rows))
+  local rows = table_map(format_row, table_transpose(cols))
+  return table.concat(rows, "\n")
 end
 
 
@@ -39,10 +100,10 @@ function calendar:init(args)
     -- notification area:
     self.html       = args.html       or '<span font_desc="monospace">\n%s</span>'
     -- highlight current date:
-    self.today      = args.today      or '<b><span color="#00ff00">%2i</span></b>'
-    self.anyday     = args.anyday     or '%2i'
+    self.day_fmt    = args.day_fmt    or '%i'
+    self.highlight  = args.highlight  or 'color="#00ff00"'
     self.page_title = args.page_title or '%B %Y'    -- month year
-    self.col_title  = args.col_title  or '%a '      -- weekday
+    self.col_title  = args.col_title  or '%a'       -- weekday
     -- Date equality check is based on day_id. We deliberately ignore the year
     -- to highlight the same day in different years:
     self.day_id     = args.day_id     or '%m-%d'
@@ -62,42 +123,44 @@ function calendar:page(month, year)
 
     local page_title = format_date(self.page_title, tA)
 
-    -- print column titles (weekday)
-    local page = "    "
-    for d = 0, 6 do
-        page = page .. format_date(self.col_title, {
+    local function wday(d)
+        return format_date(self.col_title, {
             year  = d0.year,
             month = d0.month,
             day   = d0.day + d,
         })
     end
 
-    -- print empty space before first day
-    page = page .. "\n" .. format_date(" %V", tA)
-    for column = 1, colA do
-        page = page .. "   -"
+    local rows = {}
+
+    -- column titles (weekday)
+    table.insert(rows, {"", wday(0), wday(1), wday(2), wday(3), wday(4), wday(5), wday(6)})
+
+    -- empty space before first day
+    local week = {format_date("%V", tA)}
+    while #week < 1+colA do
+        table.insert(week, "-")
     end
 
     -- iterate all days of the month
-    local nLines = 1
-    local column = colA
     for day = 1, dB.day do
-        if column == 7 then
-            column = 0
-            nLines = nLines + 1
-            page = page .. "\n" .. format_date(" %V", {year=year, month=month, day=day})
+        if #week == 8 then
+            table.insert(rows, week)
+            week = {format_date("%V", {year=year, month=month, day=day})}
         end
+        local text = self.day_fmt:format(day)
         if today == format_date(self.day_id, {day=day, month=month, year=year}) then
-            page = page .. "  " .. self.today:format(day)
-        else
-            page = page .. "  " .. self.anyday:format(day)
+            text = highlight(text, self.highlight)
         end
-        column = column + 1
+        table.insert(week, text)
     end
 
-    for column = column, 6 do
-        page = page .. "   -"
+    while #week < 8 do
+        table.insert(week, "-")
     end
+    table.insert(rows, week)
+
+    local page = tabulate(rows, " ")
 
     return page_title, self.html:format(page)
 end
@@ -112,17 +175,14 @@ function calendar:show(year, month)
     self.year   = year  or os.date('%Y', today)
     local title, text = self:page(self.month, self.year)
 
-    if self.notification then
-        naughty.replace_text(self.notification, title, text)
-    else
-        self.notification = naughty.notify({
-            title = title,
-            text = text,
-            timeout = 0,
-            hover_timeout = 0.5,
-            screen = capi.mouse.screen
-        })
-    end
+    self:hide()
+    self.notification = naughty.notify({
+        title = title,
+        text = text,
+        timeout = 0,
+        hover_timeout = 0.5,
+        screen = capi.mouse.screen,
+    })
 end
 
 function calendar:hide()
