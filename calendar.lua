@@ -112,17 +112,16 @@ function calendar:show(year, month)
     self.year   = year  or os.date('%Y', today)
     local title, text = self:page(self.month, self.year)
 
-    if self.notification then
-        naughty.replace_text(self.notification, title, text)
-    else
-        self.notification = naughty.notify({
-            title = title,
-            text = text,
-            timeout = 0,
-            hover_timeout = 0.5,
-            screen = capi.mouse.screen
-        })
-    end
+    -- TODO: update rather than recreate (naughty.replace_text does not update
+    -- bounds and is therefore not very useful)
+    self:hide()
+    self.notification = naughty.notify({
+        title = title,
+        text = text,
+        timeout = 0,
+        hover_timeout = 0.5,
+        screen = capi.mouse.screen,
+    })
 end
 
 function calendar:hide()
