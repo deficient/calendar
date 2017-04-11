@@ -13,7 +13,7 @@ Drop the script into your awesome config folder. Suggestion:
 
 ```bash
 cd ~/.config/awesome
-git clone https://github.com/coldfix/awesome-calendar.git
+git clone https://github.com/deficient/calendar.git
 ```
 
 
@@ -23,7 +23,7 @@ In your `rc.lua`:
 
 ```lua
 -- load the widget code
-local calendar = require("awesome-calendar")
+local calendar = require("calendar")
 
 -- attach it as popup to your text clock widget:
 calendar({}):attach(mytextclock)
