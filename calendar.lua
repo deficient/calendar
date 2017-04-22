@@ -112,16 +112,22 @@ function calendar:show(year, month)
     self.year   = year  or os.date('%Y', today)
     local title, text = self:page(self.month, self.year)
 
-    -- TODO: update rather than recreate (naughty.replace_text does not update
-    -- bounds and is therefore not very useful)
-    self:hide()
-    self.notification = naughty.notify({
-        title = title,
-        text = text,
-        timeout = 0,
-        hover_timeout = 0.5,
-        screen = capi.mouse.screen,
-    })
+    -- NOTE: `naughty.replace_text` does not update bounds and can therefore
+    -- not be used when the size increases (until #1707 is fixed):
+    local num_lines = select(2, text:gsub('\n', ''))
+    if self.notification and num_lines <= self.num_lines then
+        naughty.replace_text(self.notification, title, text)
+    else
+        self:hide()
+        self.notification = naughty.notify({
+            title = title,
+            text = text,
+            timeout = 0,
+            hover_timeout = 0.5,
+            screen = capi.mouse.screen,
+        })
+        self.num_lines = num_lines
+    end
 end
 
 function calendar:hide()
