@@ -13,6 +13,10 @@ local capi = {
 local awful = require("awful")
 local naughty = require("naughty")
 
+local version_major, version_minor = awesome.version:match("(%d+)%.(%d+)")
+version_major = tonumber(version_major)
+version_minor = tonumber(version_minor)
+local can_update_size = version_major >= 4 and version_minor >= 2
 
 ------------------------------------------
 -- utility functions
@@ -113,9 +117,9 @@ function calendar:show(year, month)
     local title, text = self:page(self.month, self.year)
 
     -- NOTE: `naughty.replace_text` does not update bounds and can therefore
-    -- not be used when the size increases (until #1707 is fixed):
+    -- not be used when the size increases (before #1756 was merged):
     local num_lines = select(2, text:gsub('\n', ''))
-    if self.notification and num_lines <= self.num_lines then
+    if self.notification and (can_update_size or num_lines <= self.num_lines) then
         naughty.replace_text(self.notification, title, text)
     else
         self:hide()
