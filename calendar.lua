@@ -38,6 +38,7 @@ function calendar:new(args)
 end
 
 function calendar:init(args)
+    self.num_lines  = 0
     -- first day of week: monday=1, …, sunday=7
     self.fdow       = args.fdow       or 1
     -- notification area:
@@ -119,7 +120,8 @@ function calendar:show(year, month)
     -- NOTE: `naughty.replace_text` does not update bounds and can therefore
     -- not be used when the size increases (before #1756 was merged):
     local num_lines = select(2, text:gsub('\n', ''))
-    if self.notification and (can_update_size or num_lines <= self.num_lines) then
+    local will_fit = can_update_size or num_lines <= self.num_lines
+    if naughty.replace_text and self.notification and will_fit then
         naughty.replace_text(self.notification, title, text)
     else
         self:hide()
@@ -138,6 +140,7 @@ function calendar:hide()
     if self.notification then
         naughty.destroy(self.notification)
         self.notification = nil
+        self.num_lines = 0
     end
 end
 
