@@ -16,7 +16,7 @@ local naughty = require("naughty")
 local version_major, version_minor = awesome.version:match("(%d+)%.(%d+)")
 version_major = tonumber(version_major)
 version_minor = tonumber(version_minor)
-local can_update_size = version_major >= 4 and version_minor >= 2
+local can_update_size = version_major and version_minor and version_major >= 4 and version_minor >= 2
 
 ------------------------------------------
 -- utility functions
