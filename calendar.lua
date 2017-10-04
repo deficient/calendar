@@ -51,6 +51,24 @@ function calendar:init(args)
     -- Date equality check is based on day_id. We deliberately ignore the year
     -- to highlight the same day in different years:
     self.day_id     = args.day_id     or '%m-%d'
+    self.empty_sep  = args.empty_sep  or "   -"
+    self.week_col   = args.week_col   or " %V"
+    local wd1       = args.week_day1  or self.anyday
+    local wd2       = args.week_day2  or self.anyday
+    local wd3       = args.week_day3  or self.anyday
+    local wd4       = args.week_day4  or self.anyday
+    local wd5       = args.week_day5  or self.anyday
+    local wd6       = args.week_day6  or self.anyday
+    local wd7       = args.week_day7  or self.anyday
+    self.week_days  = {wd1, wd2, wd3, wd4, wd5, wd6, wd7}
+    local td1       = args.title_day1  or self.col_title
+    local td2       = args.title_day2  or self.col_title
+    local td3       = args.title_day3  or self.col_title
+    local td4       = args.title_day4  or self.col_title
+    local td5       = args.title_day5  or self.col_title
+    local td6       = args.title_day6  or self.col_title
+    local td7       = args.title_day7  or self.col_title
+    self.title_days = {td1, td2, td3, td4, td5, td6, td7}
     return self
 end
 
@@ -70,7 +88,7 @@ function calendar:page(month, year)
     -- print column titles (weekday)
     local page = "    "
     for d = 0, 6 do
-        page = page .. format_date(self.col_title, {
+        page = page .. format_date(self.title_days[d+1], {
             year  = d0.year,
             month = d0.month,
             day   = d0.day + d,
@@ -78,9 +96,9 @@ function calendar:page(month, year)
     end
 
     -- print empty space before first day
-    page = page .. "\n" .. format_date(" %V", tA)
+    page = page .. "\n" .. format_date(self.week_col, tA)
     for column = 1, colA do
-        page = page .. "   -"
+        page = page .. self.empty_sep
     end
 
     -- iterate all days of the month
@@ -90,18 +108,18 @@ function calendar:page(month, year)
         if column == 7 then
             column = 0
             nLines = nLines + 1
-            page = page .. "\n" .. format_date(" %V", {year=year, month=month, day=day})
+            page = page .. "\n" .. format_date(self.week_col, {year=year, month=month, day=day})
         end
         if today == format_date(self.day_id, {day=day, month=month, year=year}) then
             page = page .. "  " .. self.today:format(day)
         else
-            page = page .. "  " .. self.anyday:format(day)
+            page = page .. "  " .. self.week_days[column+1]:format(day)
         end
         column = column + 1
     end
 
     for column = column, 6 do
-        page = page .. "   -"
+        page = page .. self.empty_sep
     end
 
     return page_title, self.html:format(page)
