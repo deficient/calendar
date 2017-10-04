@@ -16,7 +16,7 @@ local naughty = require("naughty")
 local version_major, version_minor = awesome.version:match("(%d+)%.(%d+)")
 version_major = tonumber(version_major)
 version_minor = tonumber(version_minor)
-local can_update_size = version_major >= 4 and version_minor >= 2
+local can_update_size = version_major and version_minor and version_major >= 4 and version_minor >= 2
 
 ------------------------------------------
 -- utility functions
@@ -51,6 +51,17 @@ function calendar:init(args)
     -- Date equality check is based on day_id. We deliberately ignore the year
     -- to highlight the same day in different years:
     self.day_id     = args.day_id     or '%m-%d'
+    self.empty_sep  = args.empty_sep  or "   -"
+    self.week_col   = args.week_col   or " %V"
+    self.days_style = {
+        args.days_style[1] or "%s",
+        args.days_style[2] or "%s",
+        args.days_style[3] or "%s",
+        args.days_style[4] or "%s",
+        args.days_style[5] or "%s",
+        args.days_style[6] or "%s",
+        args.days_style[7] or "%s"
+    }
     return self
 end
 
@@ -70,17 +81,17 @@ function calendar:page(month, year)
     -- print column titles (weekday)
     local page = "    "
     for d = 0, 6 do
-        page = page .. format_date(self.col_title, {
+        page = page .. self.days_style[d+1]:format(format_date(self.col_title, {
             year  = d0.year,
             month = d0.month,
             day   = d0.day + d,
-        })
+        }))
     end
 
     -- print empty space before first day
-    page = page .. "\n" .. format_date(" %V", tA)
+    page = page .. "\n" .. format_date(self.week_col, tA)
     for column = 1, colA do
-        page = page .. "   -"
+        page = page .. self.empty_sep
     end
 
     -- iterate all days of the month
@@ -90,18 +101,18 @@ function calendar:page(month, year)
         if column == 7 then
             column = 0
             nLines = nLines + 1
-            page = page .. "\n" .. format_date(" %V", {year=year, month=month, day=day})
+            page = page .. "\n" .. format_date(self.week_col, {year=year, month=month, day=day})
         end
         if today == format_date(self.day_id, {day=day, month=month, year=year}) then
             page = page .. "  " .. self.today:format(day)
         else
-            page = page .. "  " .. self.anyday:format(day)
+            page = page .. "  " .. self.days_style[column+1]:format(self.anyday:format(day))
         end
         column = column + 1
     end
 
     for column = column, 6 do
-        page = page .. "   -"
+        page = page .. self.empty_sep
     end
 
     return page_title, self.html:format(page)
