@@ -38,22 +38,23 @@ function calendar:new(args)
 end
 
 function calendar:init(args)
-    self.num_lines  = 0
+    self.num_lines   = 0
     -- first day of week: monday=1, …, sunday=7
-    self.fdow       = args.fdow       or 1
+    self.fdow        = args.fdow        or 1
     -- notification area:
-    self.html       = args.html       or '<span font_desc="monospace">\n%s</span>'
+    self.html        = args.html        or '<span font_desc="monospace">\n%s</span>'
     -- highlight current date:
-    self.today      = args.today      or '<b><span color="#00ff00">%2i</span></b>'
-    self.anyday     = args.anyday     or '%2i'
-    self.page_title = args.page_title or '%B %Y'    -- month year
-    self.col_title  = args.col_title  or '%a '      -- weekday
+    self.today       = args.today       or '<b><span color="#00ff00">%2i</span></b>'
+    self.anyday      = args.anyday      or '%2i'
+    self.page_title  = args.page_title  or '%B %Y'    -- month year
+    self.title_align = args.title_align or 'left'
+    self.col_title   = args.col_title   or '%a '      -- weekday
     -- Date equality check is based on day_id. We deliberately ignore the year
     -- to highlight the same day in different years:
-    self.day_id     = args.day_id     or '%m-%d'
-    self.empty_sep  = args.empty_sep  or "   -"
-    self.week_col   = args.week_col   or " %V"
-    self.days_style = {
+    self.day_id      = args.day_id      or '%m-%d'
+    self.empty_sep   = args.empty_sep   or "   -"
+    self.week_col    = args.week_col    or " %V"
+    self.days_style  = {
         args.days_style[1] or "%s",
         args.days_style[2] or "%s",
         args.days_style[3] or "%s",
@@ -77,6 +78,18 @@ function calendar:page(month, year)
     local colA = (dA.wday - d0.wday) % 7
 
     local page_title = format_date(self.page_title, tA)
+    local notify_width = 7 * self.empty_sep:len()
+
+    local space_size = 1
+    if self.title_align == 'center' then
+        space_size = notify_width/2 - page_title:len()/2 + 1
+    elseif self.title_align == 'right' then
+        space_size = notify_width - page_title:len() - 1
+    end
+
+    for i = 1, space_size do
+        page_title = ' ' .. page_title
+    end
 
     -- print column titles (weekday)
     local page = "    "
