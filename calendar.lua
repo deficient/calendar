@@ -53,16 +53,12 @@ function calendar:init(args)
     self.day_id     = args.day_id     or '%m-%d'
     self.empty_sep  = args.empty_sep  or "   -"
     self.week_col   = args.week_col   or " %V"
-    self.days_style = {
-        args.days_style[1] or "%s",
-        args.days_style[2] or "%s",
-        args.days_style[3] or "%s",
-        args.days_style[4] or "%s",
-        args.days_style[5] or "%s",
-        args.days_style[6] or "%s",
-        args.days_style[7] or "%s"
-    }
+    self.days_style = args.days_style or {}
     return self
+end
+
+function calendar:day_style(day_of_week)
+    return self.days_style[day_of_week] or '%s'
 end
 
 function calendar:page(month, year)
@@ -81,7 +77,7 @@ function calendar:page(month, year)
     -- print column titles (weekday)
     local page = "    "
     for d = 0, 6 do
-        page = page .. self.days_style[d+1]:format(format_date(self.col_title, {
+        page = page .. self:day_style(d+1):format(format_date(self.col_title, {
             year  = d0.year,
             month = d0.month,
             day   = d0.day + d,
@@ -106,7 +102,7 @@ function calendar:page(month, year)
         if today == format_date(self.day_id, {day=day, month=month, year=year}) then
             page = page .. "  " .. self.today:format(day)
         else
-            page = page .. "  " .. self.days_style[column+1]:format(self.anyday:format(day))
+            page = page .. "  " .. self:day_style(column+1):format(self.anyday:format(day))
         end
         column = column + 1
     end
