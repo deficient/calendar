@@ -1,5 +1,7 @@
 ## awesome-calendar
 
+![Screenshot](/screenshot.png?raw=true "Screenshot")
+
 ### Description
 
 Small calendar popup for awesome window manager.
