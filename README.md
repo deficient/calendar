@@ -1,10 +1,8 @@
 ## awesome-calendar
 
-![Screenshot](/screenshot.png?raw=true "Screenshot")
-
-### Description
-
 Small calendar popup for awesome window manager.
+
+![Screenshot](/screenshot.png?raw=true "Screenshot")
 
 This is a polished up and improved module based on the `calendar2.lua` module
 by Bernd Zeimetz and Marc Dequènes.
@@ -34,4 +32,4 @@ calendar({}):attach(mytextclock)
 
 ### Requirements
 
-* [awesome 4.0](http://awesome.naquadah.org/) or possibly 3.5
+* [awesome 4.0](http://awesome.naquadah.org/). May work on 3.5 with minor changes.
