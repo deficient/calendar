@@ -54,6 +54,7 @@ function calendar:init(args)
     self.empty_sep  = args.empty_sep  or "   -"
     self.week_col   = args.week_col   or " %V"
     self.days_style = args.days_style or {}
+    self.notif_pos  = args.position   or naughty.config.defaults.position
     return self
 end
 
@@ -138,6 +139,7 @@ function calendar:show(year, month)
             timeout = 0,
             hover_timeout = 0.5,
             screen = capi.mouse.screen,
+            position = self.notif_pos,
         })
         self.num_lines = num_lines
     end

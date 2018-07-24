@@ -29,6 +29,18 @@ local calendar = require("calendar")
 calendar({}):attach(mytextclock)
 ```
 
+You can also add some options to customize the widget's display. For instance:
+
+```
+local calendar = require("calendar")
+calendar_widget = calendar({
+  fdow = 7,                  -- Set Sunday as first day of the week (default is
+                             -- 1 = Monday)
+  position = "bottom_right", -- Useful if you prefer your wibox at the bottomn
+                             -- of the screen
+})
+calendar_widget:attach(mytextclock)
+```
 
 ### Requirements
 
