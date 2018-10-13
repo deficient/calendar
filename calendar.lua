@@ -38,23 +38,24 @@ function calendar:new(args)
 end
 
 function calendar:init(args)
-    self.num_lines  = 0
+    self.num_lines   = 0
+    self.today_color = args.today_color or "#00ff00"
     -- first day of week: monday=1, …, sunday=7
-    self.fdow       = args.fdow       or 1
+    self.fdow        = args.fdow        or 1
     -- notification area:
-    self.html       = args.html       or '<span font_desc="monospace">\n%s</span>'
+    self.html        = args.html        or '<span font_desc="monospace">\n%s</span>'
     -- highlight current date:
-    self.today      = args.today      or '<b><span color="#00ff00">%2i</span></b>'
-    self.anyday     = args.anyday     or '%2i'
-    self.page_title = args.page_title or '%B %Y'    -- month year
-    self.col_title  = args.col_title  or '%a '      -- weekday
+    self.today       = args.today       or '<b><span color="' .. self.today_color .. '">%2i</span></b>'
+    self.anyday      = args.anyday      or '%2i'
+    self.page_title  = args.page_title  or '%B %Y'    -- month year
+    self.col_title   = args.col_title   or '%a '      -- weekday
     -- Date equality check is based on day_id. We deliberately ignore the year
     -- to highlight the same day in different years:
-    self.day_id     = args.day_id     or '%m-%d'
-    self.empty_sep  = args.empty_sep  or "   -"
-    self.week_col   = args.week_col   or " %V"
-    self.days_style = args.days_style or {}
-    self.position   = args.position   or naughty.config.defaults.position
+    self.day_id      = args.day_id      or '%m-%d'
+    self.empty_sep   = args.empty_sep   or "   -"
+    self.week_col    = args.week_col    or " %V"
+    self.days_style  = args.days_style  or {}
+    self.position    = args.position    or naughty.config.defaults.position
     return self
 end
 
